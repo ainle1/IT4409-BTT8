@@ -1,5 +1,8 @@
 import { useState } from 'react'
 
+// Component: form để thêm người dùng mới
+// - Thu thập input từ user
+// - Gọi `onAdd(newUser)` mà không gán id (id sẽ do list quản lý gán)
 export default function AddUser({ onAdd }) {
   const [adding, setAdding] = useState(false)
   const [user, setUser] = useState({
@@ -11,6 +14,7 @@ export default function AddUser({ onAdd }) {
     website: '',
   })
 
+  // Cập nhật state khi input thay đổi
   const handleChange = (e) => {
     const { id, value } = e.target
     if (['street', 'suite', 'city'].includes(id)) {
@@ -20,13 +24,16 @@ export default function AddUser({ onAdd }) {
     }
   }
 
+  // Validate và gửi dữ liệu lên parent
+  // Lưu ý: không gán id ở đây để tránh xung đột id; ResultTable sẽ gán id an toàn
   const handleAdd = () => {
     if (!user.name.trim() || !user.username.trim()) {
       alert('Vui lòng nhập Name và Username!')
       return
     }
-    const newUser = { ...user, id: Date.now() }
+    const newUser = { ...user }
     onAdd(newUser)
+    // reset form
     setUser({ name: '', username: '', email: '', address: { street: '', suite: '', city: '' }, phone: '', website: '' })
     setAdding(false)
   }

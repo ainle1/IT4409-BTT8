@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react'
 
+// Component: hiển thị danh sách người dùng
+// - fetch dữ liệu ban đầu từ API
+// - khi có `user` mới (prop), gán id theo next sequential và append vào list
 export default function ResultTable({ keyword = '', user = null, onAdded = () => {} }) {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -28,10 +31,19 @@ export default function ResultTable({ keyword = '', user = null, onAdded = () =>
     return () => (mounted = false)
   }, [])
 
-  // Add user from prop
+  // Khi parent truyền `user` mới vào prop: tính id tiếp theo và thêm vào cuối danh sách
   useEffect(() => {
     if (user) {
-      setUsers((prev) => [user, ...prev])
+      setUsers((prev) => {
+        const maxId = prev.reduce((m, u) => {
+          const n = Number(u?.id) || 0
+          return Math.max(m, n)
+        }, 0)
+        const nextId = maxId + 1
+        const toAdd = { ...user, id: nextId }
+        return [...prev, toAdd]
+      })
+      // báo parent đã xử lý xong (reset newUser)
       onAdded()
     }
   }, [user, onAdded])
@@ -45,7 +57,7 @@ export default function ResultTable({ keyword = '', user = null, onAdded = () =>
   })
 
   function editUser(u) {
-    // deep copy to editing state
+    // deep copy để chỉnh sửa (không mutate trực tiếp trong list)
     setEditing({ ...u, address: { ...(u.address || {}) } })
   }
 
@@ -59,11 +71,13 @@ export default function ResultTable({ keyword = '', user = null, onAdded = () =>
   }
 
   function saveUser() {
+    // Lưu thay đổi: tìm theo id và thay thế
     setUsers((prev) => prev.map((u) => (u.id === editing.id ? editing : u)))
     setEditing(null)
   }
 
   function removeUser(id) {
+    // Xóa theo id
     setUsers((prev) => prev.filter((u) => u.id !== id))
   }
 
